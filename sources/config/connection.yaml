@@ -1,0 +1,10 @@
+# This file was automatically generated
+
+name: mydatabase
+type: postgres
+options:
+  host: 10.3.16.89
+  port: 5432
+  database: csdl_qlvt
+  user: umami
+  password: tuantm
