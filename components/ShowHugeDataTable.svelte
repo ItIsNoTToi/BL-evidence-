@@ -27,11 +27,15 @@
 
     $: queryFnData(`
         SELECT madinhdanh, source_ref, is_valid, jsonb_data, created_at,
-        jsonb_data->'DacTaBanTin'->>'NoiTaoBanTin' AS noi_tao_ban_tin,
-        jsonb_data->'DuLieuBanTin'->0->>'SoThongBao' AS so_thong_bao,
-        (jsonb_data->'DuLieuBanTin'->0->>'NgayCap')::date AS ngay_cap
-        FROM mydatabase.t_giaythongbao
-        WHERE madinhdanh = '60c9bec2b28cf9000875689a' AND ngay_cap >= '${RangeDate.from}' AND ngay_cap <= '${RangeDate.to}'
+        jsonb_data->>'type' AS loaitailieu,
+        jsonb_data->>'title' AS tieude,
+        jsonb_data->>'status' AS trangthai,
+        jsonb_data->'metadata'->>'author' AS tacgia,
+        jsonb_data->'metadata'->>'version' AS phienban,
+        jsonb_data->>'department' AS phongban,
+        (jsonb_data->>'created_date')::DATE AS thoi_gian_tao,
+        FROM mydatabase.huge_data_table
+        WHERE thoi_gian_tao >= '${RangeDate.from}' AND thoi_gian_tao <= '${RangeDate.to}'
         ORDER BY created_at ASC
         LIMIT ${limit}
         OFFSET ${(page - 1) * limit};
@@ -39,10 +43,8 @@
 
     $: queryFnTotal(`
         SELECT COUNT(*) AS total_orders
-        FROM mydatabase.t_giaythongbao
-        WHERE madinhdanh = '60c9bec2b28cf9000875689a'
+        FROM mydatabase.huge_data_table
     `);
-
 
     function goToPage(totalPages) {
         if (page < totalPages) page++;
@@ -87,9 +89,13 @@
                 <tr>
                     <th>STT</th>
                     <th>Mã định danh</th>
-                    <th>Nơi tạo bản tin</th>
-                    <th>Số thông báo</th>
-                    <th>Ngày cấp</th>
+                    <th>Loại tài liệu</th>
+                    <th>Tên tài liệu</th>
+                    <th>Trạng thái</th>
+                    <th>Tác giả</th>
+                    <th>Phiên bản</th>
+                    <th>Phòng ban</th>
+                    <th>Ngày tạo</th>
                     <th>Nguồn dữ liệu</th>
                     <th>Trạng thái</th>
                     <th>Thao tác</th>
@@ -101,9 +107,13 @@
                         <tr>
                             <td>{(page - 1) * limit + index + 1}</td>
                             <td>{item.madinhdanh}</td>
-                            <td>{item.noi_tao_ban_tin}</td>
-                            <td>{item.so_thong_bao}</td>
-                            <td>{item.ngay_cap}</td>
+                            <td>{item.loaitailieu}</td>
+                            <td>{item.tieude}</td>
+                            <td>{item.trangthai}</td>
+                            <td>{item.tacgia}</td>
+                            <td>{item.phienban}</td>
+                            <td>{item.phongban}</td>
+                            <td>{item.thoi_gian_tao}</td>
                             <td>{item.source_ref}</td>
                             <td>{item.is_valid ? 'Hợp lệ' : 'Không hợp lệ'}</td>
                             <td>
@@ -129,7 +139,7 @@
                     <div>Trang {page} / {totalPages}</div>
                     <button on:click={goToPage(totalPages)} disabled={page >= totalPages}>{'>'}</button>
                 </div>
-                <div>Tổng bản tin: {total[0].total_orders}</div>
+                <div>Tổng : {total[0].total_orders}</div>
                 <div>Hiển thị:
                     <select bind:value={limit} on:change={() => { page = 1; }}>
                         <option value={15}>15</option>

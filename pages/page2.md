@@ -4,10 +4,4 @@ description: "Báo cáo theo dõi chất lượng và trạng thái dữ liệu 
 
 ---
 
-```sql total_orders
-    SELECT
-        COUNT(*) AS total_orders
-    FROM mydatabase.orders;
-```
-
-<ShowTable total={total_orders} />
+<ShowTable />

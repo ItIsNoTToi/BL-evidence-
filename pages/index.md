@@ -12,7 +12,7 @@ description: "Báo cáo theo dõi chất lượng và trạng thái dữ liệu 
             (COUNT(*) FILTER (WHERE is_valid = TRUE)::numeric / COUNT(*) * 100),
             2
         ) AS valid_ratio_percent
-    FROM mydatabase.orders;
+    FROM mydatabase.t_giaythongbao;
 ```
 
 <ShowBL 
