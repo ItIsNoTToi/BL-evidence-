@@ -1,1 +1,1 @@
-SELECT * FROM t_giaythongbao
+SELECT * FROM t_giaycapphepkinhdoanh

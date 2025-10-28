@@ -1,1 +1,1 @@
-select * from huge_data_table
+select * from t_giaycapphepkinhdoanh
