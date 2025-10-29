@@ -68,6 +68,7 @@
     }
 </script>
 
+<div style="margin: 10px 0%; font-weight: bold; font-size: large;">Chọn ngày</div>
 <div style="margin-top: 1rem; display: flex; gap: 1rem; align-items: center; padding: 2px; ">
     From: 
     <input style="border: 1px solid black;" type="date" bind:value={RangeDate.from} 
@@ -81,6 +82,7 @@
     To: <input style="border: 1px solid black;" type="date" bind:value={RangeDate.to} min={RangeDate.from}/>
 </div>
 
+<div style="margin: 10px 0%; font-weight: bold; font-size: large;">Bảng hiển thị</div>
 <QueryLoad data={queryData} let:loaded={data}>
     <svelte:fragment slot="skeleton" />
     <div class="table-container">

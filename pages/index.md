@@ -2,7 +2,8 @@
 title: "Báo cáo tổng hợp trạng thái dữ liệu"
 description: "Báo cáo theo dõi chất lượng và trạng thái dữ liệu trong hệ thống."
 ---
-
+---
+# Tổng quan dữ liệu
 ```sql summaryStatistics
     SELECT
         COUNT(*) AS total_records,
@@ -14,7 +15,6 @@ description: "Báo cáo theo dõi chất lượng và trạng thái dữ liệu 
         ) AS valid_ratio_percent
     FROM mydatabase.t_giaythongbao;
 ```
-
 <ShowBL 
  data={summaryStatistics[0]} 
 />

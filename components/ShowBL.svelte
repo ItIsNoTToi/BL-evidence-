@@ -13,6 +13,7 @@
     ];
 </script>
 
+<div style="margin: 10px 0%; font-weight: bold; font-size: large;">Bảng hiển thị</div>
 <div class="container">
   <div class="content">
    <span>📦 Tổng số bản ghi: {data.total_records}</span><br>
@@ -22,7 +23,8 @@
   </div>
 </div>
 
-
+<!-- Biểu đồ -->
+<div style="margin: 10px 0%; font-weight: bold; font-size: large;">Biểu đồ</div>
 <ECharts
   config={{
     tooltip: { formatter: '{b}: {c} ({d}%)' },

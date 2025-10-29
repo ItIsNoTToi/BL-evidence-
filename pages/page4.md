@@ -2,6 +2,9 @@
 title: "Báo cáo hoạt động User"
 ---
 
+---
+# Thống kê tổng quan <Info description="Thông tin thống kê tổng quan" />
+
 ```sql summaryStatistics
   SELECT
     COUNT(*) FILTER (WHERE is_valid = TRUE) AS Active_Users,
@@ -12,7 +15,7 @@ title: "Báo cáo hoạt động User"
     COUNT(*) FILTER (WHERE is_valid = FALSE) AS DraftedOver30Days_User
   FROM mydatabase.t_giaythongbao
 ```
-Thống kê tổng quan<Info description="Thông tin thống kê tổng quan" />
+## Dữ liệu thống kê
 <BigValue 
   data={summaryStatistics} 
   value=Total_Users
@@ -64,11 +67,20 @@ Thống kê tổng quan<Info description="Thông tin thống kê tổng quan" />
   comparisonTitle="User"
 />
 
+---
+# 
+
 ```sql getdata
   select
-    (jsonb_data -> 'CoQuanCap' ->> 'TenCoSoToChuc') as TenCoSoToChuc,
+    (jsonb_data -> 'CoQuanCap' ->> 'TenCoSoToChuc') as TenCoSoToChuc
   from mydatabase.t_giaythongbao
   GROUP BY TenCoSoToChuc
+```
+
+```sql date
+  SELECT created_at::timestamp AS day
+  FROM mydatabase.t_giaythongbao
+  ORDER BY day DESC
 ```
 
 <Dropdown 
@@ -78,35 +90,30 @@ Thống kê tổng quan<Info description="Thông tin thống kê tổng quan" />
   title="Chọn sở:"
   defaultValue="Sở Xây dựng tỉnh Bắc Ninh"
 />
-
-```sql date
-  SELECT created_at AS day
-  FROM mydatabase.t_giaythongbao
-  ORDER BY day DESC;
-```
-
+Chọn ngày:
 <DateInput
   name=pick_date 
-  title="Chọn ngày:"
   data={date}
   dates=day
 />
 
+---
+# Phân tích trạng thái login/logout tài khoản user <Info description="Phân tích trạng thái login/logout tài khoản của user theo sở" />
+
 ```sql DataBarchart
   SELECT
-    EXTRACT(HOUR FROM created_at) AS Detail_hour,
-    COUNT(*) FILTER (WHERE is_valid = TRUE) AS Published_User,
-    COUNT(*) FILTER (WHERE is_valid = FALSE) AS Drafted_User
+    EXTRACT(HOUR FROM created_at::timestamp) AS "Detail_hour",
+    COUNT(*) FILTER (WHERE is_valid = TRUE) AS "Published_User",
+    COUNT(*) FILTER (WHERE is_valid = FALSE) AS "Drafted_User"
   FROM mydatabase.t_giaythongbao
   WHERE 
     (jsonb_data -> 'CoQuanCap' ->> 'TenCoSoToChuc') = '${inputs.So_value.value}'
     AND created_at::timestamp >= '${inputs.pick_date.value}'
-  GROUP BY Detail_hour
-  ORDER BY Detail_hour;
+  GROUP BY "Detail_hour"
+  ORDER BY "Detail_hour"
 ```
 
-Phân tích trạng thái login/logout tài khoản user <Info description="Phân tích trạng thái login/logout tài khoản của user theo sở" />
-
+## Biểu đồ
 <Grid cols=2 >
   <Chart data={DataBarchart} title="BarChart + Line Chart" >
       <Bar y=Drafted_User/>
@@ -121,6 +128,7 @@ Phân tích trạng thái login/logout tài khoản user <Info description="Phâ
   />
 </Grid>
 
+## Bảng hiển thị
 <TextInput
   name=username
   title="Tìm theo Username:"
@@ -147,19 +155,20 @@ Phân tích trạng thái login/logout tài khoản user <Info description="Phâ
     (jsonb_data -> 'CoQuanCap' ->> 'TenCoSoToChuc') = '${inputs.So_value.value}'
     AND created_at::timestamp >= '${inputs.pick_date.value}' 
     AND (jsonb_data -> 'ToChuc' ->  'HoatDongKinhDoanh' -> 'LoaiHinhKinhDoanh' -> 0 ->> 'username') like '${inputs.username}'
-  ORDER BY COUNT(*) OVER (PARTITION BY (jsonb_data -> 'ToChuc' -> 'HoatDongKinhDoanh' -> 'LoaiHinhKinhDoanh' -> 0 ->> 'username')) DESC
-  LIMIT CASE WHEN ${inputs.gettop5} THEN 5 ELSE NULL END
+  ORDER BY COUNT(*) OVER (PARTITION BY (jsonb_data -> 'ToChuc' -> 'HoatDongKinhDoanh' -> 'LoaiHinhKinhDoanh' -> 0 ->> 'username')) DESC;
 ```
 
 <DataTable 
-data={Data}
+data={inputs.gettop5 ? Data.slice(0,5) : Data}
 title="Bảng thông tin tài khoản hoạt động theo Sở"
 rows=10
 search=true
 />
 
-Danh sách tài khoản bị cấm / đang chờ xử lý <Info description="Danh sách thông tin tài khoản bị cấm hoặc đang chờ xử lý" />
+---
+# Danh sách tài khoản bị cấm / đang chờ xử lý <Info description="Danh sách thông tin tài khoản bị cấm hoặc đang chờ xử lý" />
 
+## Bảng hiển thị
 <TextInput
   name=username_ban
   title="Tìm theo Username:"
@@ -186,7 +195,8 @@ rows=10
 search=true
 />
 
-Phân bố user theo trạng thái
+---
+# Phân bố user theo trạng thái
 
 ```sql pie_query
   SELECT
@@ -196,7 +206,7 @@ Phân bố user theo trạng thái
   FROM mydatabase.t_giaythongbao
   WHERE 
     (jsonb_data -> 'CoQuanCap' ->> 'TenCoSoToChuc') = '${inputs.So_value.value}'
-    AND created_at::timestamp >= '${inputs.pick_date.value}';
+    AND created_at::timestamp >= '${inputs.pick_date.value}'
 ```
 
 ```sql pie_data
@@ -206,9 +216,10 @@ SELECT 'Nháp' AS name, Drafted_User AS value FROM ${pie_query}
 UNION ALL
 SELECT 'Hoạt động' AS name, (Published_User + Drafted_User) AS value FROM ${pie_query}
 UNION ALL
-SELECT 'Không hoạt động' AS name, (Total_Users - (Published_User + Drafted_User)) AS value FROM ${pie_query};
+SELECT 'Không hoạt động' AS name, (Total_Users - (Published_User + Drafted_User)) AS value FROM ${pie_query}
 ```
 
+## Biểu đồ
 <ECharts config={{
   tooltip: {
     trigger: 'item',
@@ -234,3 +245,31 @@ SELECT 'Không hoạt động' AS name, (Total_Users - (Published_User + Drafted
   ]
 }} />
 
+---
+# Thời lượng truy cập <Info description="Heatmap hiển thị thông tin lượng truy cập" />
+
+```sql Heatmapdata
+  SELECT 
+    "Detail_hour",
+    'Published_User' AS category,
+    "Published_User" AS value
+  FROM ${DataBarchart}
+  UNION ALL
+  SELECT 
+    "Detail_hour",
+    'Drafted_User' AS category,
+    "Drafted_User" AS value
+  FROM ${DataBarchart}
+  ORDER BY "Detail_hour", category
+```
+
+## Biểu đồ
+<Heatmap
+  data={Heatmapdata}
+  x="Detail_hour"
+  y=category
+  value=value
+  colorScale={[
+    ['rgb(254,234,159)', 'rgb(218,66,41)']
+  ]}
+/>
